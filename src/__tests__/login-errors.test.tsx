@@ -313,7 +313,8 @@ describe('Login Error Handling', () => {
 
       await waitFor(() => {
         expect(screen.getByRole('alert')).toBeInTheDocument()
-        expect(screen.getByText('An unexpected error occurred. Please try again.')).toBeInTheDocument()
+        // Network errors are mapped to connection error messages
+        expect(screen.getByText('Connection error. Please check your internet connection and try again.')).toBeInTheDocument()
       })
 
       // Loading should be cleared

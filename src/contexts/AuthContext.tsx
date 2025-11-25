@@ -55,28 +55,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   const handleSignIn = async (data: SignInData): Promise<AuthResponse> => {
-    setLoading(true)
+    // Don't set global loading state for sign-in - let components handle their own loading
     try {
       const result = await signIn(data)
       if (result.user) {
         setUser(result.user)
       }
       return result
-    } finally {
-      setLoading(false)
+    } catch (error) {
+      // Ensure any unexpected errors are properly formatted
+      return {
+        user: null,
+        error: error as any
+      }
     }
   }
 
   const handleSignUp = async (data: SignUpData): Promise<AuthResponse> => {
-    setLoading(true)
+    // Don't set global loading state for sign-up - let components handle their own loading
     try {
       const result = await signUp(data)
       if (result.user) {
         setUser(result.user)
       }
       return result
-    } finally {
-      setLoading(false)
+    } catch (error) {
+      // Ensure any unexpected errors are properly formatted
+      return {
+        user: null,
+        error: error as any
+      }
     }
   }
 

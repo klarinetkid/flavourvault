@@ -66,10 +66,16 @@ const Login: React.FC = () => {
       }
 
       if (result.user) {
+        // Only reset form on successful login
         reset()
         navigate(from, { replace: true })
+      } else {
+        // Handle case where no error but also no user (shouldn't happen but defensive)
+        setError('Login failed. Please try again.')
+        setIsLoading(false)
       }
     } catch (err) {
+      console.error('Login error:', err)
       setError('An unexpected error occurred. Please try again.')
       setIsLoading(false)
     }
