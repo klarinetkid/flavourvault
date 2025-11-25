@@ -66,9 +66,9 @@ const Register: React.FC = () => {
 
       if (user) {
         setSuccess(true)
-        // Navigate to home page after successful registration
+        // Navigate to email verification page after successful registration
         setTimeout(() => {
-          navigate('/')
+          navigate('/verify-email')
         }, 2000)
       }
     } catch (err) {
@@ -102,9 +102,9 @@ const Register: React.FC = () => {
             <div className="text-center space-y-4">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
               <div>
-                <h2 className="text-2xl font-bold">Welcome to FlavourVault!</h2>
+                <h2 className="text-2xl font-bold">Account Created!</h2>
                 <p className="text-muted-foreground mt-2">
-                  Your account has been created successfully. You'll be redirected shortly.
+                  Please check your email to verify your account before signing in.
                 </p>
               </div>
             </div>

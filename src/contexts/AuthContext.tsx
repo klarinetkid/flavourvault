@@ -1,15 +1,17 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { getCurrentUser, onAuthStateChange, signIn, signUp, signOut, resetPassword } from '@/lib/auth'
+import { getCurrentUser, onAuthStateChange, signIn, signUp, signOut, resetPassword, resendVerificationEmail } from '@/lib/auth'
 import type { AuthUser, SignInData, SignUpData, AuthResponse } from '@/lib/auth'
 import type { AuthError } from '@supabase/supabase-js'
 
 interface AuthContextType {
   user: AuthUser | null
   loading: boolean
+  isEmailConfirmed: boolean
   signIn: (data: SignInData) => Promise<AuthResponse>
   signUp: (data: SignUpData) => Promise<AuthResponse>
   signOut: () => Promise<{ error: AuthError | null }>
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>
+  resendVerificationEmail: (email: string) => Promise<{ error: AuthError | null }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -21,6 +23,9 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
+  
+  // Check if user's email is confirmed
+  const isEmailConfirmed = user ? !!user.email_confirmed_at : false
 
   useEffect(() => {
     // Get initial user
@@ -92,13 +97,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return await resetPassword(email)
   }
 
+  const handleResendVerificationEmail = async (email: string) => {
+    return await resendVerificationEmail(email)
+  }
+
   const value: AuthContextType = {
     user,
     loading,
+    isEmailConfirmed,
     signIn: handleSignIn,
     signUp: handleSignUp,
     signOut: handleSignOut,
     resetPassword: handleResetPassword,
+    resendVerificationEmail: handleResendVerificationEmail,
   }
 
   return (

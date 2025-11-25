@@ -5,6 +5,7 @@ export interface AuthUser {
   id: string
   email: string
   created_at: string
+  email_confirmed_at: string | null
 }
 
 export interface AuthResponse {
@@ -37,7 +38,8 @@ export const signUp = async ({ email, password }: SignUpData): Promise<AuthRespo
     const user = data.user ? {
       id: data.user.id,
       email: data.user.email!,
-      created_at: data.user.created_at
+      created_at: data.user.created_at,
+      email_confirmed_at: data.user.email_confirmed_at
     } : null
 
     return { user, error: null }
@@ -64,7 +66,8 @@ export const signIn = async ({ email, password }: SignInData): Promise<AuthRespo
     const user = data.user ? {
       id: data.user.id,
       email: data.user.email!,
-      created_at: data.user.created_at
+      created_at: data.user.created_at,
+      email_confirmed_at: data.user.email_confirmed_at
     } : null
 
     return { user, error: null }
@@ -98,7 +101,8 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     return {
       id: user.id,
       email: user.email!,
-      created_at: user.created_at
+      created_at: user.created_at,
+      email_confirmed_at: user.email_confirmed_at
     }
   } catch (error) {
     console.error('Error getting current user:', error)
@@ -129,7 +133,8 @@ export const onAuthStateChange = (callback: (user: AuthUser | null) => void) => 
     const user = session?.user ? {
       id: session.user.id,
       email: session.user.email!,
-      created_at: session.user.created_at
+      created_at: session.user.created_at,
+      email_confirmed_at: session.user.email_confirmed_at
     } : null
     
     callback(user)
@@ -152,6 +157,19 @@ export const resetPassword = async (email: string): Promise<{ error: AuthError |
 export const updatePassword = async (password: string): Promise<{ error: AuthError | null }> => {
   try {
     const { error } = await supabase.auth.updateUser({ password })
+    return { error }
+  } catch (error) {
+    return { error: error as AuthError }
+  }
+}
+
+// Resend verification email
+export const resendVerificationEmail = async (email: string): Promise<{ error: AuthError | null }> => {
+  try {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+    })
     return { error }
   } catch (error) {
     return { error: error as AuthError }

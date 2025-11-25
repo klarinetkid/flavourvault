@@ -117,15 +117,40 @@ describe('Recipe Service', () => {
 
       const { supabase } = await import('@/lib/supabase')
       const mockFrom = vi.mocked(supabase.from)
-      const mockInsert = vi.fn(() => ({
-        select: vi.fn(() => ({
-          single: vi.fn(() => ({
-            data: mockRecipe,
-            error: null
-          }))
-        }))
+      
+      // Mock the complete chain for createRecipe
+      const mockSingle = vi.fn(() => ({
+        data: mockRecipe,
+        error: null
       }))
-      mockFrom.mockReturnValue({ insert: mockInsert } as any)
+      const mockSelect = vi.fn(() => ({
+        single: mockSingle
+      }))
+      const mockInsert = vi.fn(() => ({
+        select: mockSelect
+      }))
+      
+      // Mock the chain for getting existing recipes (order_index calculation)
+      const mockLimit = vi.fn(() => ({
+        data: [],
+        error: null
+      }))
+      const mockOrder = vi.fn(() => ({
+        limit: mockLimit
+      }))
+      const mockSelectForOrder = vi.fn(() => ({
+        order: mockOrder
+      }))
+      
+      mockFrom.mockImplementation((table) => {
+        if (table === 'recipes') {
+          return {
+            select: mockSelectForOrder,
+            insert: mockInsert
+          } as any
+        }
+        return {} as any
+      })
 
       const recipeData: CreateRecipeData = {
         name: 'New Recipe',

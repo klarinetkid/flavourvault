@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ButtonSpinner } from '@/components/LoadingSpinner'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { mapAuthError, shouldDisplayInlineError } from '@/lib/errorMapping'
+import type { AuthError } from '@supabase/supabase-js'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -23,6 +25,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [inlineError, setInlineError] = useState<string | null>(null)
   
   const { signIn } = useAuth()
   const navigate = useNavigate()
@@ -34,6 +37,7 @@ const Login: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
@@ -41,24 +45,32 @@ const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     setError(null)
+    setInlineError(null)
 
     try {
-      const { user, error } = await signIn({
+      const result = await signIn({
         email: data.email,
         password: data.password,
       })
       
-      if (error) {
-        setError(error.message)
+      if (result.error) {
+        const mappedError = mapAuthError(result.error as AuthError)
+        
+        if (shouldDisplayInlineError(result.error as AuthError)) {
+          setInlineError(mappedError)
+        } else {
+          setError(mappedError)
+        }
+        setIsLoading(false)
         return
       }
 
-      if (user) {
+      if (result.user) {
+        reset()
         navigate(from, { replace: true })
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.')
-    } finally {
       setIsLoading(false)
     }
   }
@@ -125,6 +137,12 @@ const Login: React.FC = () => {
               </div>
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
+              {inlineError && (
+                <p className="text-sm text-destructive flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {inlineError}
+                </p>
               )}
             </div>
           </CardContent>

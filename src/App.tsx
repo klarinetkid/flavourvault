@@ -10,6 +10,8 @@ import { SupabaseSetupRequired } from "@/components/SupabaseSetupRequired";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 
 // Check for Supabase configuration errors
@@ -118,6 +120,10 @@ const App = () => {
                     </PublicOnlyRoute>
                   }
                 />
+                
+                {/* Public Routes */}
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
