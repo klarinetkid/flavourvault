@@ -53,3 +53,48 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Responsive design utilities */
+@layer utilities {
+  /* Ensure mobile header spans full width on small screens */
+  @media (max-width: 768px) {
+    .mobile-header {
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+    }
+    
+    /* Hide sidebar on small screens by default */
+    .sidebar-desktop {
+      display: none;
+    }
+    
+    /* Ensure main content has proper top padding on mobile */
+    .main-content-mobile {
+      padding-top: 4rem; /* 64px to account for fixed header */
+    }
+    
+    /* Reduce top padding in recipe detail view on mobile for consistent 16px gap */
+    .recipe-detail-mobile {
+      padding-top: 1rem; /* 16px - creates consistent gap with header */
+    }
+  }
+  
+  /* Show sidebar on medium+ screens */
+  @media (min-width: 769px) {
+    .sidebar-desktop {
+      display: block;
+    }
+    
+    .mobile-header {
+      display: none;
+    }
+    
+    .main-content-mobile {
+      padding-top: 0;
+    }
+  }
+}

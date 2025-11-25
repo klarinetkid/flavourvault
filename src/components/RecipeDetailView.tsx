@@ -43,7 +43,7 @@ export const RecipeDetailView = ({
     amount: ingredient.amount * scale
   }));
   return (
-    <div className="h-full overflow-y-auto p-4 md:p-8">
+    <div className="h-full overflow-y-auto p-4 recipe-detail-mobile md:p-8 md:pt-8">
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h1 className="text-2xl md:text-4xl font-bold text-foreground break-words">

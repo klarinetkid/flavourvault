@@ -78,7 +78,7 @@ export const RecipeEditForm = ({
   };
 
   return (
-    <div className="h-full overflow-y-auto p-4 md:p-8">
+    <div className="h-full overflow-y-auto p-4 recipe-detail-mobile md:p-8 md:pt-8">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-6">
           {recipe.id.startsWith("new-") ? "New Recipe" : "Edit Recipe"}
@@ -138,18 +138,8 @@ export const RecipeEditForm = ({
           </Card>
 
           <Card className="p-4 md:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="mb-4">
               <h2 className="text-lg md:text-xl font-bold text-foreground">Ingredients</h2>
-              <Button
-                type="button"
-                onClick={handleAddIngredient}
-                variant="outline"
-                size="sm"
-                className="w-full sm:w-auto"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Ingredient
-              </Button>
             </div>
 
             <DraggableIngredientList
@@ -157,6 +147,7 @@ export const RecipeEditForm = ({
               onUpdateIngredient={handleUpdateIngredient}
               onDeleteIngredient={handleDeleteIngredient}
               onReorderIngredients={handleReorderIngredients}
+              onAddIngredient={handleAddIngredient}
             />
           </Card>
 

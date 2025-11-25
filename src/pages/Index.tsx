@@ -105,7 +105,7 @@ const Index = () => {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Mobile Header */}
+      {/* Mobile Header - Fixed at top for small screens */}
       <MobileHeader
         onToggleSidebar={handleToggleSidebar}
         onNewRecipe={handleNewRecipe}
@@ -120,12 +120,13 @@ const Index = () => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Hidden on small screens, visible on medium+ screens */}
       <div
         className={`
           fixed md:relative inset-y-0 left-0 z-50 w-80 flex-shrink-0 transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           md:translate-x-0 md:block
+          hidden md:block
         `}
       >
         <RecipeList
@@ -135,7 +136,22 @@ const Index = () => {
         />
       </div>
 
-      {/* Main Content */}
+      {/* Mobile Sidebar - Only shown when toggled on small screens */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 w-80 flex-shrink-0 transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:hidden pt-16
+        `}
+      >
+        <RecipeList
+          recipes={recipes}
+          selectedRecipeId={selectedRecipeId}
+          onSelectRecipe={handleSelectRecipe}
+        />
+      </div>
+
+      {/* Main Content - Adjusted for mobile header */}
       <div className="flex-1 flex flex-col pt-16 md:pt-0">
         {viewMode === "empty" && (
           <div className="h-screen flex items-center justify-center">
