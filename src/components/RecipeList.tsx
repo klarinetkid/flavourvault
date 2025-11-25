@@ -8,20 +8,22 @@ interface RecipeListProps {
   recipes: Recipe[];
   selectedRecipeId: string | null;
   onSelectRecipe: (id: string) => void;
-  onReorderRecipe: (id: string, direction: "up" | "down") => void;
 }
 
 export const RecipeList = ({
   recipes,
   selectedRecipeId,
   onSelectRecipe,
-  onReorderRecipe,
 }: RecipeListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredRecipes = recipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRecipes = recipes
+    .filter((recipe) =>
+      recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+    );
 
   return (
     <div className="h-screen flex flex-col bg-list-bg border-r border-border">
@@ -44,16 +46,12 @@ export const RecipeList = ({
             {searchTerm ? "No recipes found" : "No recipes yet"}
           </div>
         ) : (
-          filteredRecipes.map((recipe, index) => (
+          filteredRecipes.map((recipe) => (
             <RecipeListItem
               key={recipe.id}
               name={recipe.name}
               isSelected={recipe.id === selectedRecipeId}
               onSelect={() => onSelectRecipe(recipe.id)}
-              onMoveUp={() => onReorderRecipe(recipe.id, "up")}
-              onMoveDown={() => onReorderRecipe(recipe.id, "down")}
-              canMoveUp={index > 0}
-              canMoveDown={index < filteredRecipes.length - 1}
             />
           ))
         )}

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { IngredientRow } from "./IngredientRow";
+import { DraggableIngredientList } from "./DraggableIngredientList";
+import { ConfirmationDialog } from "./ConfirmationDialog";
 import { Plus } from "lucide-react";
 
 interface RecipeEditFormProps {
@@ -19,6 +20,29 @@ export const RecipeEditForm = ({
   onCancel,
 }: RecipeEditFormProps) => {
   const [editedRecipe, setEditedRecipe] = useState<Recipe>(recipe);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  // Check if there are unsaved changes
+  const hasChanges = () => {
+    return (
+      editedRecipe.name !== recipe.name ||
+      editedRecipe.servings !== recipe.servings ||
+      editedRecipe.notes !== recipe.notes ||
+      JSON.stringify(editedRecipe.ingredients) !== JSON.stringify(recipe.ingredients)
+    );
+  };
+
+  const handleCancelClick = () => {
+    if (hasChanges()) {
+      setShowCancelConfirm(true);
+    } else {
+      onCancel();
+    }
+  };
+
+  const handleCancelConfirm = () => {
+    onCancel();
+  };
 
   const handleAddIngredient = () => {
     const newIngredient: Ingredient = {
@@ -44,14 +68,8 @@ export const RecipeEditForm = ({
     setEditedRecipe({ ...editedRecipe, ingredients: newIngredients });
   };
 
-  const handleMoveIngredient = (index: number, direction: "up" | "down") => {
-    const newIngredients = [...editedRecipe.ingredients];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    [newIngredients[index], newIngredients[targetIndex]] = [
-      newIngredients[targetIndex],
-      newIngredients[index],
-    ];
-    setEditedRecipe({ ...editedRecipe, ingredients: newIngredients });
+  const handleReorderIngredients = (reorderedIngredients: Ingredient[]) => {
+    setEditedRecipe({ ...editedRecipe, ingredients: reorderedIngredients });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,14 +78,14 @@ export const RecipeEditForm = ({
   };
 
   return (
-    <div className="h-screen overflow-y-auto p-8">
+    <div className="h-full overflow-y-auto p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold text-foreground mb-6">
+        <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-6">
           {recipe.id.startsWith("new-") ? "New Recipe" : "Edit Recipe"}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-semibold text-muted-foreground block mb-2">
@@ -119,52 +137,50 @@ export const RecipeEditForm = ({
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-foreground">Ingredients</h2>
+          <Card className="p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <h2 className="text-lg md:text-xl font-bold text-foreground">Ingredients</h2>
               <Button
                 type="button"
                 onClick={handleAddIngredient}
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Ingredient
               </Button>
             </div>
 
-            <div className="space-y-2">
-              {editedRecipe.ingredients.length === 0 ? (
-                <p className="text-muted-foreground text-center py-4">
-                  No ingredients yet. Click "Add Ingredient" to start.
-                </p>
-              ) : (
-                editedRecipe.ingredients.map((ingredient, index) => (
-                  <IngredientRow
-                    key={ingredient.id}
-                    ingredient={ingredient}
-                    onUpdate={(updated) => handleUpdateIngredient(index, updated)}
-                    onDelete={() => handleDeleteIngredient(index)}
-                    onMoveUp={() => handleMoveIngredient(index, "up")}
-                    onMoveDown={() => handleMoveIngredient(index, "down")}
-                    canMoveUp={index > 0}
-                    canMoveDown={index < editedRecipe.ingredients.length - 1}
-                  />
-                ))
-              )}
-            </div>
+            <DraggableIngredientList
+              ingredients={editedRecipe.ingredients}
+              onUpdateIngredient={handleUpdateIngredient}
+              onDeleteIngredient={handleDeleteIngredient}
+              onReorderIngredients={handleReorderIngredients}
+            />
           </Card>
 
-          <div className="flex gap-3">
-            <Button type="submit" size="lg">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button type="submit" size="lg" className="w-full sm:w-auto">
               Save Recipe
             </Button>
-            <Button type="button" variant="outline" size="lg" onClick={onCancel}>
+            <Button type="button" variant="outline" size="lg" onClick={handleCancelClick} className="w-full sm:w-auto">
               Cancel
             </Button>
           </div>
         </form>
       </div>
+
+      <ConfirmationDialog
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={handleCancelConfirm}
+        title="Discard Changes"
+        description="Are you sure you want to discard changes? All unsaved changes will be lost."
+        confirmText="Discard"
+        cancelText="Keep Editing"
+        variant="destructive"
+      />
     </div>
   );
 };

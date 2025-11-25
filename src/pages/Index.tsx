@@ -4,6 +4,7 @@ import { loadRecipes, saveRecipes } from "@/lib/localStorage";
 import { RecipeList } from "@/components/RecipeList";
 import { RecipeDetailView } from "@/components/RecipeDetailView";
 import { RecipeEditForm } from "@/components/RecipeEditForm";
+import { MobileHeader } from "@/components/MobileHeader";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -13,6 +14,7 @@ const Index = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("empty");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const loadedRecipes = loadRecipes();
@@ -24,29 +26,14 @@ const Index = () => {
   const handleSelectRecipe = (id: string) => {
     setSelectedRecipeId(id);
     setViewMode("view");
+    // Close sidebar on mobile when selecting a recipe
+    setIsSidebarOpen(false);
   };
 
-  const handleReorderRecipe = (id: string, direction: "up" | "down") => {
-    const currentIndex = recipes.findIndex((r) => r.id === id);
-    if (currentIndex === -1) return;
-
-    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= recipes.length) return;
-
-    const newRecipes = [...recipes];
-    [newRecipes[currentIndex], newRecipes[targetIndex]] = [
-      newRecipes[targetIndex],
-      newRecipes[currentIndex],
-    ];
-
-    // Update order values
-    newRecipes.forEach((recipe, index) => {
-      recipe.order = index;
-    });
-
-    setRecipes(newRecipes);
-    saveRecipes(newRecipes);
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
+
 
   const handleNewRecipe = () => {
     const newRecipe: Recipe = {
@@ -61,6 +48,8 @@ const Index = () => {
     setRecipes([...recipes, newRecipe]);
     setSelectedRecipeId(newRecipe.id);
     setViewMode("edit");
+    // Close sidebar on mobile when creating new recipe
+    setIsSidebarOpen(false);
   };
 
   const handleSaveRecipe = (updatedRecipe: Recipe) => {
@@ -116,15 +105,38 @@ const Index = () => {
 
   return (
     <div className="flex h-screen bg-background">
-      <div className="w-80 flex-shrink-0">
+      {/* Mobile Header */}
+      <MobileHeader
+        onToggleSidebar={handleToggleSidebar}
+        onNewRecipe={handleNewRecipe}
+        showNewButton={viewMode !== "empty"}
+      />
+
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed md:relative inset-y-0 left-0 z-50 w-80 flex-shrink-0 transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0 md:block
+        `}
+      >
         <RecipeList
           recipes={recipes}
           selectedRecipeId={selectedRecipeId}
           onSelectRecipe={handleSelectRecipe}
-          onReorderRecipe={handleReorderRecipe}
         />
       </div>
-      <div className="flex-1">
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col pt-16 md:pt-0">
         {viewMode === "empty" && (
           <div className="h-screen flex items-center justify-center">
             <div className="text-center">
@@ -156,10 +168,12 @@ const Index = () => {
           />
         )}
       </div>
+
+      {/* Desktop Floating Action Button */}
       {viewMode !== "empty" && (
         <Button
           onClick={handleNewRecipe}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hidden md:flex"
           size="icon"
         >
           <Plus className="h-6 w-6" />
