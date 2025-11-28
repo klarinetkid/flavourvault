@@ -43,17 +43,19 @@ export const RecipeListItem = ({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 h-6">
             <span className="text-sm font-medium text-foreground truncate">
               {recipe.name}
             </span>
             {optimisticFavourite && (
-              <FavouriteButton
-                isFavourite={optimisticFavourite}
-                onToggle={handleFavouriteToggle}
-                size="sm"
-                variant="icon"
-              />
+              <div className="flex-shrink-0 h-6 flex items-center">
+                <FavouriteButton
+                  isFavourite={optimisticFavourite}
+                  onToggle={handleFavouriteToggle}
+                  size="sm"
+                  variant="icon"
+                />
+              </div>
             )}
           </div>
         </div>
