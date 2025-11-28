@@ -73,20 +73,20 @@ export const FilterPanel = ({
 
   return (
     <div className={cn("relative", className)}>
-      {/* Filter Toggle Button */}
+      {/* Filter Toggle Button - Icon Only */}
       <Button
         variant="outline"
-        size="sm"
+        size="icon"
         onClick={onToggle}
         className={cn(
-          "gap-2",
+          "relative",
           hasActiveFilters && "border-primary text-primary"
         )}
+        title="Filters"
       >
         <Filter className="h-4 w-4" />
-        Filters
         {hasActiveFilters && (
-          <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+          <Badge variant="secondary" className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-xs">
             {filters.selectedTags.length + (filters.showFavouritesOnly ? 1 : 0) + (filters.searchInIngredients ? 1 : 0)}
           </Badge>
         )}
@@ -94,7 +94,7 @@ export const FilterPanel = ({
 
       {/* Filter Panel */}
       {isOpen && (
-        <Card className="absolute top-full right-0 z-50 mt-2 w-80 p-4 shadow-lg">
+        <Card className="fixed top-16 left-0 z-50 w-80 p-4 shadow-lg">
           <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -215,27 +215,6 @@ export const FilterPanel = ({
                 )}
               </div>
 
-              {/* Available Tags (when no input) */}
-              {!tagInput && availableTags.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">Available tags:</p>
-                  <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                    {availableTags
-                      .filter(tag => !filters.selectedTags.includes(tag))
-                      .slice(0, 10)
-                      .map((tag, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="cursor-pointer hover:bg-accent"
-                          onClick={() => addTag(tag)}
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </Card>

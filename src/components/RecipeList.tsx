@@ -118,21 +118,21 @@ export const RecipeList = ({
       <div className="p-4 border-b border-border bg-card">
         <h1 className="text-2xl font-bold text-foreground mb-4">FlavourVault</h1>
         <div className="space-y-3">
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder={filters.searchInIngredients ? "Search recipes and ingredients..." : "Search recipes..."}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              className="pl-9 pr-20"
-            />
-          </div>
-
-          {/* Filter Panel */}
-          <div className="flex justify-end">
+          {/* Search Input with inline Filter Button */}
+          <div className="flex gap-2 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder={filters.searchInIngredients ? "Search recipes and ingredients..." : "Search recipes..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                className="pl-9"
+              />
+            </div>
+            
+            {/* Filter Panel */}
             <FilterPanel
               isOpen={isFilterPanelOpen}
               onToggle={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
