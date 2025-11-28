@@ -105,6 +105,8 @@ const Index = () => {
       servings: 1,
       notes: "",
       ingredients: [],
+      tags: [],                    // NEW: Default empty tags array
+      is_favourite: false,         // NEW: Default favourite status
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       order_index: recipes.length,
@@ -121,12 +123,14 @@ const Index = () => {
     try {
       if (isNew) {
         // Create new recipe
-        const { name, servings, notes, ingredients, order_index } = updatedRecipe;
+        const { name, servings, notes, ingredients, tags, is_favourite, order_index } = updatedRecipe;
         const result = await createRecipeMutation.mutateAsync({
           name,
           servings,
           notes,
           ingredients,
+          tags,
+          is_favourite,
           order_index,
         });
         
@@ -139,7 +143,7 @@ const Index = () => {
         }
       } else {
         // Update existing recipe
-        const { name, servings, notes, ingredients, order_index } = updatedRecipe;
+        const { name, servings, notes, ingredients, tags, is_favourite, order_index } = updatedRecipe;
         await updateRecipeMutation.mutateAsync({
           id: updatedRecipe.id,
           updates: {
@@ -147,6 +151,8 @@ const Index = () => {
             servings,
             notes,
             ingredients,
+            tags,
+            is_favourite,
             order_index,
           },
         });
@@ -372,6 +378,8 @@ const Index = () => {
               servings: 1,
               notes: "",
               ingredients: [],
+              tags: [],                    // NEW: Default empty tags array
+              is_favourite: false,         // NEW: Default favourite status
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               order_index: recipes.length,

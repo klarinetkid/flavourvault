@@ -1,13 +1,19 @@
+import { Recipe } from "@/types/recipe";
+import { FavouriteButton } from "./FavouriteButton";
+import { TagDisplay } from "./TagDisplay";
+
 interface RecipeListItemProps {
-  name: string;
+  recipe: Recipe;
   isSelected: boolean;
   onSelect: () => void;
+  onFavouriteToggle: (isFavourite: boolean) => void;
 }
 
 export const RecipeListItem = ({
-  name,
+  recipe,
   isSelected,
   onSelect,
+  onFavouriteToggle,
 }: RecipeListItemProps) => {
   return (
     <div
@@ -16,7 +22,28 @@ export const RecipeListItem = ({
       } cursor-pointer transition-colors`}
       onClick={onSelect}
     >
-      <span className="text-sm font-medium text-foreground">{name}</span>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-medium text-foreground truncate">
+              {recipe.name}
+            </span>
+            <FavouriteButton
+              isFavourite={recipe.is_favourite}
+              onToggle={onFavouriteToggle}
+              size="sm"
+              variant="icon"
+            />
+          </div>
+          {recipe.tags.length > 0 && (
+            <TagDisplay
+              tags={recipe.tags}
+              variant="compact"
+              className="mt-1"
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 };

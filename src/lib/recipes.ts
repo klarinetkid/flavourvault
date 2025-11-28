@@ -1,11 +1,13 @@
 import { supabase } from './supabase'
-import type { Recipe, Ingredient } from '@/types/recipe'
+import type { Recipe, Ingredient, RecipeFilters } from '@/types/recipe'
 
 export interface CreateRecipeData {
   name: string
   servings: number
   notes: string
   ingredients: Ingredient[]
+  tags?: string[]          // NEW: Optional tags array
+  is_favourite?: boolean   // NEW: Optional favourite status
   order_index?: number
 }
 
@@ -14,6 +16,8 @@ export interface UpdateRecipeData {
   servings?: number
   notes?: string
   ingredients?: Ingredient[]
+  tags?: string[]          // NEW: Optional tags array
+  is_favourite?: boolean   // NEW: Optional favourite status
   order_index?: number
 }
 
@@ -211,5 +215,109 @@ export const createRecipes = async (recipes: CreateRecipeData[]): Promise<Recipe
   } catch (error) {
     console.error('Error creating recipes:', error)
     return { data: null, error: 'Failed to create recipes' }
+  }
+}
+
+// Toggle favourite status
+export const toggleRecipeFavourite = async (
+  id: string,
+  isFavourite: boolean
+): Promise<RecipeResponse> => {
+  try {
+    const { data, error } = await supabase
+      .from('recipes')
+      .update({
+        is_favourite: isFavourite,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating favourite status:', error)
+      return { data: null, error: error.message }
+    }
+
+    return { data, error: null }
+  } catch (error) {
+    console.error('Error updating favourite status:', error)
+    return { data: null, error: 'Failed to update favourite status' }
+  }
+}
+
+// Get all unique tags for current user
+export const getUserTags = async (): Promise<{ data: string[] | null; error: string | null }> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return { data: null, error: 'User not authenticated' }
+    }
+
+    const { data, error } = await supabase
+      .rpc('get_user_tags', { user_uuid: user.id })
+
+    if (error) {
+      console.error('Error fetching tags:', error)
+      return { data: null, error: error.message }
+    }
+
+    return { data: data || [], error: null }
+  } catch (error) {
+    console.error('Error fetching tags:', error)
+    return { data: null, error: 'Failed to fetch tags' }
+  }
+}
+
+// Advanced recipe search with filters
+export const searchRecipes = async (filters: RecipeFilters): Promise<RecipesResponse> => {
+  try {
+    let query = supabase
+      .from('recipes')
+      .select('*')
+      .order('order_index', { ascending: true })
+
+    // Apply favourite filter
+    if (filters.showFavouritesOnly) {
+      query = query.eq('is_favourite', true)
+    }
+
+    // Apply tag filters (OR logic for multiple tags)
+    if (filters.selectedTags.length > 0) {
+      query = query.overlaps('tags', filters.selectedTags)
+    }
+
+    const { data: recipes, error } = await query
+
+    if (error) {
+      console.error('Error searching recipes:', error)
+      return { data: null, error: error.message }
+    }
+
+    // Client-side filtering for search terms
+    let filteredRecipes = recipes || []
+
+    if (filters.searchTerm.trim()) {
+      const searchTerm = filters.searchTerm.toLowerCase()
+      
+      filteredRecipes = filteredRecipes.filter(recipe => {
+        // Search in recipe name
+        const nameMatch = recipe.name.toLowerCase().includes(searchTerm)
+        
+        // Search in ingredients if enabled
+        const ingredientMatch = filters.searchInIngredients &&
+          recipe.ingredients.some((ingredient: Ingredient) =>
+            ingredient.name.toLowerCase() === searchTerm
+          )
+
+        return nameMatch || ingredientMatch
+      })
+    }
+
+    return { data: filteredRecipes, error: null }
+  } catch (error) {
+    console.error('Error searching recipes:', error)
+    return { data: null, error: 'Failed to search recipes' }
   }
 }

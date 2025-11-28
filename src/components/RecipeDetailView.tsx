@@ -4,20 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { ScalingControl } from "./ScalingControl";
+import { TagDisplay } from "./TagDisplay";
+import { FavouriteButton } from "./FavouriteButton";
+import { toggleRecipeFavourite } from "@/lib/recipes";
+import { useToast } from "@/hooks/use-toast";
 
 interface RecipeDetailViewProps {
   recipe: Recipe;
   onEdit: () => void;
   onDelete: () => void;
+  onRecipeUpdate?: (recipe: Recipe) => void;
 }
 
 export const RecipeDetailView = ({
   recipe,
   onEdit,
   onDelete,
+  onRecipeUpdate,
 }: RecipeDetailViewProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [scale, setScale] = useState(1);
+  const { toast } = useToast();
 
   // Reset scale when recipe changes
   useEffect(() => {
@@ -36,6 +43,31 @@ export const RecipeDetailView = ({
     setScale(newScale);
   };
 
+  const handleFavouriteToggle = async (isFavourite: boolean) => {
+    try {
+      const { data, error } = await toggleRecipeFavourite(recipe.id, isFavourite);
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update favourite status",
+          variant: "destructive",
+        });
+      } else if (data && onRecipeUpdate) {
+        onRecipeUpdate(data);
+        toast({
+          title: isFavourite ? "Added to favourites" : "Removed from favourites",
+          description: `${recipe.name} has been ${isFavourite ? 'added to' : 'removed from'} your favourites.`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update favourite status",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Calculate scaled values
   const scaledServings = recipe.servings * scale;
   const scaledIngredients = recipe.ingredients.map(ingredient => ({
@@ -45,10 +77,26 @@ export const RecipeDetailView = ({
   return (
     <div className="h-full overflow-y-auto p-4 recipe-detail-mobile md:p-8 md:pt-8">
       <div className="max-w-3xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h1 className="text-2xl md:text-4xl font-bold text-foreground break-words">
-            {recipe.name}
-          </h1>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-2xl md:text-4xl font-bold text-foreground break-words">
+                {recipe.name}
+              </h1>
+              <FavouriteButton
+                isFavourite={recipe.is_favourite}
+                onToggle={handleFavouriteToggle}
+                size="lg"
+                variant="icon"
+              />
+            </div>
+            {recipe.tags.length > 0 && (
+              <TagDisplay
+                tags={recipe.tags}
+                className="mb-2"
+              />
+            )}
+          </div>
           <div className="flex gap-2 flex-shrink-0">
             <Button onClick={onEdit} variant="default" size="sm" className="md:size-default">
               Edit

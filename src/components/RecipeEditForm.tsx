@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Recipe, Ingredient } from "@/types/recipe";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DraggableIngredientList } from "./DraggableIngredientList";
 import { ConfirmationDialog } from "./ConfirmationDialog";
+import { TagInput } from "./TagInput";
+import { getUserTags } from "@/lib/recipes";
 import { Plus } from "lucide-react";
 
 interface RecipeEditFormProps {
@@ -21,6 +24,18 @@ export const RecipeEditForm = ({
 }: RecipeEditFormProps) => {
   const [editedRecipe, setEditedRecipe] = useState<Recipe>(recipe);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  // Load available tags
+  useEffect(() => {
+    const loadTags = async () => {
+      const { data, error } = await getUserTags();
+      if (!error && data) {
+        setAvailableTags(data);
+      }
+    };
+    loadTags();
+  }, []);
 
   // Check if there are unsaved changes
   const hasChanges = () => {
@@ -28,7 +43,9 @@ export const RecipeEditForm = ({
       editedRecipe.name !== recipe.name ||
       editedRecipe.servings !== recipe.servings ||
       editedRecipe.notes !== recipe.notes ||
-      JSON.stringify(editedRecipe.ingredients) !== JSON.stringify(recipe.ingredients)
+      editedRecipe.is_favourite !== recipe.is_favourite ||
+      JSON.stringify(editedRecipe.ingredients) !== JSON.stringify(recipe.ingredients) ||
+      JSON.stringify(editedRecipe.tags) !== JSON.stringify(recipe.tags)
     );
   };
 
@@ -133,6 +150,35 @@ export const RecipeEditForm = ({
                   placeholder="Add any notes or instructions..."
                   rows={4}
                 />
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-muted-foreground block mb-2">
+                  TAGS
+                </label>
+                <TagInput
+                  tags={editedRecipe.tags}
+                  onChange={(tags) => setEditedRecipe({ ...editedRecipe, tags })}
+                  availableTags={availableTags}
+                  maxTags={5}
+                  placeholder="Add a tag..."
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is-favourite"
+                  checked={editedRecipe.is_favourite}
+                  onCheckedChange={(checked) =>
+                    setEditedRecipe({ ...editedRecipe, is_favourite: !!checked })
+                  }
+                />
+                <label
+                  htmlFor="is-favourite"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Mark as favourite
+                </label>
               </div>
             </div>
           </Card>
