@@ -18,10 +18,10 @@ export const RecipeListItem = ({
 }: RecipeListItemProps) => {
   const [optimisticFavourite, setOptimisticFavourite] = useState(recipe.is_favourite);
 
-  // Sync optimistic state when recipe changes
+  // Sync optimistic state when recipe changes (including external updates)
   useEffect(() => {
     setOptimisticFavourite(recipe.is_favourite);
-  }, [recipe.is_favourite]);
+  }, [recipe.is_favourite, recipe.id]); // Include recipe.id to handle recipe changes
 
   const handleFavouriteToggle = async (isFavourite: boolean) => {
     // Optimistic update - update UI immediately

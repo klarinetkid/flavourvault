@@ -207,6 +207,11 @@ const Index = () => {
     }
   };
 
+  const handleRecipeUpdate = (updatedRecipe: Recipe) => {
+    // This will trigger a refetch of all recipes, ensuring the list is updated
+    refetch();
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -306,6 +311,7 @@ const Index = () => {
             recipes={recipes}
             selectedRecipeId={selectedRecipeId}
             onSelectRecipe={handleSelectRecipe}
+            onRecipeUpdate={handleRecipeUpdate}
           />
         )}
       </div>
@@ -327,6 +333,7 @@ const Index = () => {
             recipes={recipes}
             selectedRecipeId={selectedRecipeId}
             onSelectRecipe={handleSelectRecipe}
+            onRecipeUpdate={handleRecipeUpdate}
           />
         )}
       </div>
@@ -366,6 +373,7 @@ const Index = () => {
             recipe={selectedRecipe}
             onEdit={handleEditRecipe}
             onDelete={handleDeleteRecipe}
+            onRecipeUpdate={handleRecipeUpdate}
           />
         )}
         
