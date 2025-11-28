@@ -4,12 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DraggableIngredientList } from "./DraggableIngredientList";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { TagInput } from "./TagInput";
 import { getUserTags } from "@/lib/recipes";
-import { Plus } from "lucide-react";
 
 interface RecipeEditFormProps {
   recipe: Recipe;
@@ -43,7 +41,6 @@ export const RecipeEditForm = ({
       editedRecipe.name !== recipe.name ||
       editedRecipe.servings !== recipe.servings ||
       editedRecipe.notes !== recipe.notes ||
-      editedRecipe.is_favourite !== recipe.is_favourite ||
       JSON.stringify(editedRecipe.ingredients) !== JSON.stringify(recipe.ingredients) ||
       JSON.stringify(editedRecipe.tags) !== JSON.stringify(recipe.tags)
     );
@@ -165,21 +162,6 @@ export const RecipeEditForm = ({
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is-favourite"
-                  checked={editedRecipe.is_favourite}
-                  onCheckedChange={(checked) =>
-                    setEditedRecipe({ ...editedRecipe, is_favourite: !!checked })
-                  }
-                />
-                <label
-                  htmlFor="is-favourite"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Mark as favourite
-                </label>
-              </div>
             </div>
           </Card>
 

@@ -97,7 +97,7 @@ export const TagInput = ({
       {safeTags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {safeTags.map((tag, index) => (
-            <Badge key={index} variant="secondary" className="gap-1">
+            <Badge key={index} variant="default" className="gap-1">
               {tag}
               <Button
                 variant="ghost"

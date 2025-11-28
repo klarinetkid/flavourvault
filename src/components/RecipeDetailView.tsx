@@ -88,6 +88,7 @@ export const RecipeDetailView = ({
                 onToggle={handleFavouriteToggle}
                 size="lg"
                 variant="icon"
+                className="[&>svg]:!h-6 [&>svg]:!w-6"
               />
             </div>
             {recipe.tags.length > 0 && (

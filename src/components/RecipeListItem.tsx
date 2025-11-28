@@ -28,20 +28,15 @@ export const RecipeListItem = ({
             <span className="text-sm font-medium text-foreground truncate">
               {recipe.name}
             </span>
-            <FavouriteButton
-              isFavourite={recipe.is_favourite}
-              onToggle={onFavouriteToggle}
-              size="sm"
-              variant="icon"
-            />
+            {recipe.is_favourite && (
+              <FavouriteButton
+                isFavourite={recipe.is_favourite}
+                onToggle={onFavouriteToggle}
+                size="sm"
+                variant="icon"
+              />
+            )}
           </div>
-          {recipe.tags.length > 0 && (
-            <TagDisplay
-              tags={recipe.tags}
-              variant="compact"
-              className="mt-1"
-            />
-          )}
         </div>
       </div>
     </div>
