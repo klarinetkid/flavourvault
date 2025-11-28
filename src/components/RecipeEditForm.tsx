@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Recipe, Ingredient } from "@/types/recipe";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { DraggableIngredientList } from "./DraggableIngredientList";
 import { ConfirmationDialog } from "./ConfirmationDialog";
-import { Plus } from "lucide-react";
+import { TagInput } from "./TagInput";
+import { getUserTags } from "@/lib/recipes";
 
 interface RecipeEditFormProps {
   recipe: Recipe;
@@ -21,6 +22,18 @@ export const RecipeEditForm = ({
 }: RecipeEditFormProps) => {
   const [editedRecipe, setEditedRecipe] = useState<Recipe>(recipe);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  // Load available tags
+  useEffect(() => {
+    const loadTags = async () => {
+      const { data, error } = await getUserTags();
+      if (!error && data) {
+        setAvailableTags(data);
+      }
+    };
+    loadTags();
+  }, []);
 
   // Check if there are unsaved changes
   const hasChanges = () => {
@@ -28,7 +41,8 @@ export const RecipeEditForm = ({
       editedRecipe.name !== recipe.name ||
       editedRecipe.servings !== recipe.servings ||
       editedRecipe.notes !== recipe.notes ||
-      JSON.stringify(editedRecipe.ingredients) !== JSON.stringify(recipe.ingredients)
+      JSON.stringify(editedRecipe.ingredients) !== JSON.stringify(recipe.ingredients) ||
+      JSON.stringify(editedRecipe.tags) !== JSON.stringify(recipe.tags)
     );
   };
 
@@ -134,6 +148,20 @@ export const RecipeEditForm = ({
                   rows={4}
                 />
               </div>
+
+              <div>
+                <label className="text-sm font-semibold text-muted-foreground block mb-2">
+                  TAGS
+                </label>
+                <TagInput
+                  tags={editedRecipe.tags}
+                  onChange={(tags) => setEditedRecipe({ ...editedRecipe, tags })}
+                  availableTags={availableTags}
+                  maxTags={5}
+                  placeholder="Add a tag..."
+                />
+              </div>
+
             </div>
           </Card>
 
