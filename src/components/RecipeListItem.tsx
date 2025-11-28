@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Recipe } from "@/types/recipe";
 import { FavouriteButton } from "./FavouriteButton";
 import { TagDisplay } from "./TagDisplay";
@@ -15,6 +16,24 @@ export const RecipeListItem = ({
   onSelect,
   onFavouriteToggle,
 }: RecipeListItemProps) => {
+  const [optimisticFavourite, setOptimisticFavourite] = useState(recipe.is_favourite);
+
+  // Sync optimistic state when recipe changes
+  useEffect(() => {
+    setOptimisticFavourite(recipe.is_favourite);
+  }, [recipe.is_favourite]);
+
+  const handleFavouriteToggle = async (isFavourite: boolean) => {
+    // Optimistic update - update UI immediately
+    setOptimisticFavourite(isFavourite);
+    
+    try {
+      await onFavouriteToggle(isFavourite);
+    } catch (error) {
+      // Revert optimistic update on error
+      setOptimisticFavourite(!isFavourite);
+    }
+  };
   return (
     <div
       className={`p-3 border-b border-border ${
@@ -28,10 +47,10 @@ export const RecipeListItem = ({
             <span className="text-sm font-medium text-foreground truncate">
               {recipe.name}
             </span>
-            {recipe.is_favourite && (
+            {optimisticFavourite && (
               <FavouriteButton
-                isFavourite={recipe.is_favourite}
-                onToggle={onFavouriteToggle}
+                isFavourite={optimisticFavourite}
+                onToggle={handleFavouriteToggle}
                 size="sm"
                 variant="icon"
               />

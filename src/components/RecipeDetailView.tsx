@@ -24,12 +24,14 @@ export const RecipeDetailView = ({
 }: RecipeDetailViewProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [scale, setScale] = useState(1);
+  const [optimisticFavourite, setOptimisticFavourite] = useState(recipe.is_favourite);
   const { toast } = useToast();
 
-  // Reset scale when recipe changes
+  // Reset scale and sync optimistic favourite when recipe changes
   useEffect(() => {
     setScale(1);
-  }, [recipe.id]);
+    setOptimisticFavourite(recipe.is_favourite);
+  }, [recipe.id, recipe.is_favourite]);
 
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
@@ -44,9 +46,14 @@ export const RecipeDetailView = ({
   };
 
   const handleFavouriteToggle = async (isFavourite: boolean) => {
+    // Optimistic update - update UI immediately
+    setOptimisticFavourite(isFavourite);
+    
     try {
       const { data, error } = await toggleRecipeFavourite(recipe.id, isFavourite);
       if (error) {
+        // Revert optimistic update on error
+        setOptimisticFavourite(!isFavourite);
         toast({
           title: "Error",
           description: "Failed to update favourite status",
@@ -60,6 +67,8 @@ export const RecipeDetailView = ({
         });
       }
     } catch (error) {
+      // Revert optimistic update on error
+      setOptimisticFavourite(!isFavourite);
       toast({
         title: "Error",
         description: "Failed to update favourite status",
@@ -84,7 +93,7 @@ export const RecipeDetailView = ({
                 {recipe.name}
               </h1>
               <FavouriteButton
-                isFavourite={recipe.is_favourite}
+                isFavourite={optimisticFavourite}
                 onToggle={handleFavouriteToggle}
                 size="lg"
                 variant="icon"
